@@ -9,8 +9,10 @@ public class Cube : MonoBehaviour
     private Material _material;
     private Rigidbody _rigidbody;
 
+    private ColorService _colorService;
+
     private Color _standartColor;
-    private bool _isColorChangeTriggered = false;
+    private bool _isTouchedPlatform = false;
     private float _lifespan;
 
     private void Awake()
@@ -18,29 +20,32 @@ public class Cube : MonoBehaviour
         _material = GetComponent<MeshRenderer>().material;
         _rigidbody = GetComponent<Rigidbody>();
 
+        _colorService = new ColorService();
+
         _standartColor = _material.color;
     }
 
     private void OnEnable()
     {
-        _isColorChangeTriggered = false;
+        _isTouchedPlatform = false;
         _material.color = _standartColor;
         _rigidbody.velocity = Vector3.zero;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (_isColorChangeTriggered == false && collision.collider.TryGetComponent(out Platform _))
+        if (_isTouchedPlatform == false && collision.collider.TryGetComponent(out Platform _))
         {
-            ColorChanger.RandomColor(_material);
-            _isColorChangeTriggered = true;
+            _material.color = _colorService.PickRandom();
+            _isTouchedPlatform = true;
             _lifespan = Random.Range(2.0f, 5.0f);
-            Invoke(nameof(SetDisabled), _lifespan);
+            StartCoroutine(SetDisabled(_lifespan));
         }
     }
 
-    private void SetDisabled()
+    private IEnumerator SetDisabled(float delay)
     {
+        yield return new WaitForSeconds(delay);
         gameObject.SetActive(false);
     }
 }

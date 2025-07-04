@@ -4,22 +4,18 @@ using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour
 {
-    [SerializeField] private ObjectPool _cubeObjectPool;
+    [SerializeField] private CubeObjectPool _cubeObjectPool;
+    [SerializeField] private List<Platform> _platformsForSpawn = new();
     [SerializeField] private float _spawnHeightDelta = 10.0f;
     [SerializeField] private float _spawnDelay = 0.2f;
 
-    public void AddPlatformForSpawn(Platform platform)
-    {
-        StartCoroutine(ProcessPlatform(platform));
-    }
-
-    public IEnumerator ProcessPlatform(Platform platform)
+    private IEnumerator ProcessPlatform(Platform platform)
     {
         while (platform != null)
         {
             yield return new WaitForSeconds(_spawnDelay);
 
-            GameObject cube = _cubeObjectPool.GetPooledObject();
+            Cube cube = _cubeObjectPool.GetCube();
 
             if (cube == null)
                 continue;
@@ -28,12 +24,20 @@ public class CubeSpawner : MonoBehaviour
             float halfSizeX = platform.Size.x / 2;
             float halfSizeY = platform.Size.y / 2;
             float randomX = Random.Range(platformPosition.x - halfSizeX, platformPosition.x + halfSizeX);
-            float randomY = Random.Range(platformPosition.y - halfSizeY, platformPosition.y + halfSizeY);
-            Vector3 spawnPosition = new Vector3(randomX, _spawnHeightDelta + platformPosition.z, randomY);
+            float randomY = Random.Range(platformPosition.z - halfSizeY, platformPosition.z + halfSizeY);
+            Vector3 spawnPosition = new Vector3(randomX, _spawnHeightDelta + platformPosition.y, randomY);
 
             cube.transform.position = spawnPosition;
             cube.transform.rotation = Quaternion.identity;
-            cube.SetActive(true);
+            cube.gameObject.SetActive(true);
+        }
+    }
+
+    private void Start()
+    {
+        foreach (Platform platform in _platformsForSpawn)
+        {
+            StartCoroutine(ProcessPlatform(platform));
         }
     }
 }
