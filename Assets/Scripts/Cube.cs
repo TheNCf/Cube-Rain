@@ -2,33 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(ColorChanger))]
 public class Cube : MonoBehaviour
 {
-    private Material _material;
     private Rigidbody _rigidbody;
+    private ColorChanger _colorChanger;
 
-    private ColorService _colorService;
-
-    private Color _standartColor;
     private bool _isTouchedPlatform = false;
     private float _lifespan;
+    private float _minLifespan = 2.0f;
+    private float _maxLifespan = 5.0f;
 
     private void Awake()
     {
-        _material = GetComponent<MeshRenderer>().material;
         _rigidbody = GetComponent<Rigidbody>();
-
-        _colorService = new ColorService();
-
-        _standartColor = _material.color;
+        _colorChanger = GetComponent<ColorChanger>();
     }
 
     private void OnEnable()
     {
         _isTouchedPlatform = false;
-        _material.color = _standartColor;
         _rigidbody.velocity = Vector3.zero;
     }
 
@@ -36,9 +30,9 @@ public class Cube : MonoBehaviour
     {
         if (_isTouchedPlatform == false && collision.collider.TryGetComponent(out Platform _))
         {
-            _material.color = _colorService.PickRandom();
+            _colorChanger.PickRandom();
             _isTouchedPlatform = true;
-            _lifespan = Random.Range(2.0f, 5.0f);
+            _lifespan = Random.Range(_minLifespan, _maxLifespan);
             StartCoroutine(SetDisabled(_lifespan));
         }
     }

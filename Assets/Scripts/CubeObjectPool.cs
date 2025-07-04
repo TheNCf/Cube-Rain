@@ -24,7 +24,7 @@ public class CubeObjectPool : MonoBehaviour
     public Cube GetCube()
     {
         foreach (Cube obj in _pooledObjects)
-            if (!obj.gameObject.activeInHierarchy)
+            if (obj.gameObject.activeInHierarchy == false)
                 return obj;
 
         Cube buffer = Instantiate(_objectToPool);
