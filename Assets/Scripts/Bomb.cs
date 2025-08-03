@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Bomb : MonoBehaviour
+[RequireComponent(typeof(ColorChanger))]
+public class Bomb : MonoBehaviour, IPoolableObject
 {
     [SerializeField, Min(0.0001f)] private float _radius = 5.0f;
     [SerializeField] private float _explosionForce = 10.0f;
@@ -14,6 +16,11 @@ public class Bomb : MonoBehaviour
     [SerializeField] private LayerMask _affectedLayers;
 
     private Rigidbody _rigidbody;
+    private ColorChanger _colorChanger;
+
+    private float _lifetime;
+
+    public Action<Bomb> Exploded;
 
     private void OnValidate()
     {
@@ -24,11 +31,13 @@ public class Bomb : MonoBehaviour
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
+        _colorChanger = GetComponent<ColorChanger>();
     }
 
-    private void Start()
+    private void OnDrawGizmosSelected()
     {
-        StartCoroutine(ExplodeCoroutine());
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, _radius);
     }
 
     private void Explode()
@@ -43,15 +52,31 @@ public class Bomb : MonoBehaviour
 
     private IEnumerator ExplodeCoroutine()
     {
-        float lifetime = Random.Range(_minLifetime, _maxLifetime);
-        yield return new WaitForSeconds(lifetime);
+        yield return new WaitForSeconds(_lifetime);
         Explode();
-        //TODO: Destroy or release to object pool
+        Exploded?.Invoke(this);
     }
 
-    private void OnDrawGizmosSelected()
+    private IEnumerator FadeOutCoroutine()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _radius);
+        float elapsedTime = 0.0f;
+
+        while (elapsedTime < _lifetime)
+        {
+            float alpha = 1 - elapsedTime / _lifetime;
+            _colorChanger.SetAlpha(alpha);
+            yield return null;
+            elapsedTime += Time.deltaTime;
+        }
+    }
+
+    public void ResetObject()
+    {
+        _colorChanger.Default();
+        StopAllCoroutines();
+        _rigidbody.velocity = Vector3.zero;
+        _lifetime = UnityEngine.Random.Range(_minLifetime, _maxLifetime);
+        StartCoroutine(ExplodeCoroutine());
+        StartCoroutine(FadeOutCoroutine());
     }
 }

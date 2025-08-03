@@ -14,7 +14,7 @@ public class ColorChanger : MonoBehaviour
         _standartColor = _material.color;
     }
 
-    private void OnEnable()
+    public void Default()
     {
         _material.color = _standartColor;
     }
@@ -22,5 +22,14 @@ public class ColorChanger : MonoBehaviour
     public void PickRandom()
     {
         _material.color = Random.ColorHSV();
+    }
+
+    public void SetAlpha(float alpha)
+    {
+        alpha = Mathf.Clamp01(alpha);
+
+        Color color = _material.color;
+        color.a = alpha;
+        _material.color = color;
     }
 }

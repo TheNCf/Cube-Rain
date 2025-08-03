@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public abstract class SpawnerBase<T> : MonoBehaviour where T : Object
+public abstract class SpawnerBase<T> : MonoBehaviour where T : Object, IPoolableObject
 {
-    [SerializeField] protected T _prefabToSpawn;
+    [SerializeField] protected T PrefabToSpawn;
     [SerializeField] protected int PoolSizeAtStart = 100;
 
     protected ObjectPool<T> ObjectPool;

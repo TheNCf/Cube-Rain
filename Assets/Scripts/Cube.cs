@@ -5,8 +5,10 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(ColorChanger))]
-public class Cube : MonoBehaviour
+public class Cube : MonoBehaviour, IPoolableObject
 {
+    [SerializeField] private float _terminationHeight = -10.0f;
+
     private Rigidbody _rigidbody;
     private ColorChanger _colorChanger;
 
@@ -23,10 +25,10 @@ public class Cube : MonoBehaviour
         _colorChanger = GetComponent<ColorChanger>();
     }
 
-    private void OnEnable()
+    private void FixedUpdate()
     {
-        _isTouchedPlatform = false;
-        _rigidbody.velocity = Vector3.zero;
+        if (transform.position.y < _terminationHeight)
+            LifespanExpired?.Invoke(this);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -44,5 +46,13 @@ public class Cube : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         LifespanExpired?.Invoke(this);
+    }
+
+    public void ResetObject()
+    {
+        StopAllCoroutines();
+        _isTouchedPlatform = false;
+        _rigidbody.velocity = Vector3.zero;
+        _colorChanger.Default();
     }
 }

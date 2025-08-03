@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class ObjectPool<T> where T : UnityEngine.Object
+public class ObjectPool<T> where T : UnityEngine.Object, IPoolableObject
 {
     private readonly List<T> _pooledObjectList;
 

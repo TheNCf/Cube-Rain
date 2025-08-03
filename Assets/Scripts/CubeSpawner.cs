@@ -8,6 +8,8 @@ public class CubeSpawner : SpawnerBase<Cube>
     [SerializeField] private float _spawnHeightDelta = 10.0f;
     [SerializeField] private float _spawnDelay = 0.2f;
 
+    [SerializeField] private BombSpawner _bombSpawner;
+
     private void Start()
     {
         foreach (Platform platform in _platformsForSpawn)
@@ -40,25 +42,32 @@ public class CubeSpawner : SpawnerBase<Cube>
 
     protected override Cube Create()
     {
-        Cube cube = Instantiate(_prefabToSpawn, transform);
+        Cube cube = Instantiate(PrefabToSpawn, transform);
         cube.gameObject.SetActive(false);
         return cube;
     }
 
     protected override void OnGet(Cube cube)
     {
-        cube.LifespanExpired += ObjectPool.Release;
+        cube.LifespanExpired += OnCubeLifespanExpired;
         cube.gameObject.SetActive(true);
+        cube.ResetObject();
     }
 
     protected override void OnRelease(Cube cube)
     {
-        cube.LifespanExpired -= ObjectPool.Release;
+        cube.LifespanExpired -= OnCubeLifespanExpired;
         cube.gameObject.SetActive(false);
     }
 
     protected override void OnClear(Cube cube)
     {
         Destroy(cube.gameObject);
+    }
+
+    private void OnCubeLifespanExpired(Cube cube)
+    {
+        _bombSpawner.Spawn(cube.transform.position);
+        ObjectPool.Release(cube);
     }
 }
