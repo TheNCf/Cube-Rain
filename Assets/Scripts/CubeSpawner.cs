@@ -2,23 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CubeSpawner : MonoBehaviour
+public class CubeSpawner : SpawnerBase<Cube>
 {
-    [SerializeField] private CubeObjectPool _cubeObjectPool;
     [SerializeField] private List<Platform> _platformsForSpawn = new();
     [SerializeField] private float _spawnHeightDelta = 10.0f;
     [SerializeField] private float _spawnDelay = 0.2f;
 
+    private void Start()
+    {
+        foreach (Platform platform in _platformsForSpawn)
+        {
+            StartCoroutine(ProcessPlatform(platform));
+        }
+    }
+
     private IEnumerator ProcessPlatform(Platform platform)
     {
+        WaitForSeconds spawnWait = new WaitForSeconds(_spawnDelay);
+
         while (platform != null)
         {
-            yield return new WaitForSeconds(_spawnDelay);
+            yield return spawnWait;
 
-            Cube cube = _cubeObjectPool.GetCube();
-
-            if (cube == null)
-                continue;
+            Cube cube = ObjectPool.Get();
 
             Vector3 platformPosition = platform.transform.position;
             float halfSizeX = platform.Size.x / 2;
@@ -29,15 +35,30 @@ public class CubeSpawner : MonoBehaviour
 
             cube.transform.position = spawnPosition;
             cube.transform.rotation = Quaternion.identity;
-            cube.gameObject.SetActive(true);
         }
     }
 
-    private void Start()
+    protected override Cube Create()
     {
-        foreach (Platform platform in _platformsForSpawn)
-        {
-            StartCoroutine(ProcessPlatform(platform));
-        }
+        Cube cube = Instantiate(_prefabToSpawn, transform);
+        cube.gameObject.SetActive(false);
+        return cube;
+    }
+
+    protected override void OnGet(Cube cube)
+    {
+        cube.LifespanExpired += ObjectPool.Release;
+        cube.gameObject.SetActive(true);
+    }
+
+    protected override void OnRelease(Cube cube)
+    {
+        cube.LifespanExpired -= ObjectPool.Release;
+        cube.gameObject.SetActive(false);
+    }
+
+    protected override void OnClear(Cube cube)
+    {
+        Destroy(cube.gameObject);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,8 @@ public class Cube : MonoBehaviour
     private float _lifespan;
     private float _minLifespan = 2.0f;
     private float _maxLifespan = 5.0f;
+
+    public Action<Cube> LifespanExpired;
 
     private void Awake()
     {
@@ -32,14 +35,14 @@ public class Cube : MonoBehaviour
         {
             _colorChanger.PickRandom();
             _isTouchedPlatform = true;
-            _lifespan = Random.Range(_minLifespan, _maxLifespan);
-            StartCoroutine(SetDisabled(_lifespan));
+            _lifespan = UnityEngine.Random.Range(_minLifespan, _maxLifespan);
+            StartCoroutine(LifespanCoroutine(_lifespan));
         }
     }
 
-    private IEnumerator SetDisabled(float delay)
+    private IEnumerator LifespanCoroutine(float delay)
     {
         yield return new WaitForSeconds(delay);
-        gameObject.SetActive(false);
+        LifespanExpired?.Invoke(this);
     }
 }

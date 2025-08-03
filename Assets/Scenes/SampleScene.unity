@@ -186,7 +186,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccfdb5e7efa60b7499eed1de582b13ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cubeObjectPool: {fileID: 283793384}
+  _prefabToSpawn: {fileID: -1754000160546345604, guid: 2bd8cd35291ca2b45ab0617b02bc3009, type: 3}
+  PoolSizeAtStart: 100
   _platformsForSpawn:
   - {fileID: 2121896738}
   - {fileID: 999066284}
