@@ -9,6 +9,7 @@ public class ObjectPool<T> where T : UnityEngine.Object, IPoolableObject
     private readonly List<T> _pooledObjectList;
 
     private int _pooledAtStart;
+    private int _countAll;
 
     private Func<T> _createFunction;
     private Action<T> _onGetAction;
@@ -27,9 +28,9 @@ public class ObjectPool<T> where T : UnityEngine.Object, IPoolableObject
         Initialize();
     }
 
-    public int CountAll { get; private set; }
+    public int CountAll => _countAll;
     public int CountInactive => _pooledObjectList.Count;
-    public int CountActive => CountAll - CountActive;
+    public int CountActive => CountAll - CountInactive;
 
     public T Get()
     {
@@ -38,7 +39,7 @@ public class ObjectPool<T> where T : UnityEngine.Object, IPoolableObject
         if (CountInactive == 0)
         {
             result = _createFunction();
-            CountAll++;
+            _countAll++;
         }
         else
         {
@@ -68,7 +69,7 @@ public class ObjectPool<T> where T : UnityEngine.Object, IPoolableObject
             foreach (var obj in _pooledObjectList)
                 _onClearAction?.Invoke(obj);
 
-        CountAll = 0;
+        _countAll = 0;
         _pooledObjectList.Clear();
     }
 
@@ -80,7 +81,7 @@ public class ObjectPool<T> where T : UnityEngine.Object, IPoolableObject
         {
             buffer = _createFunction();
             _pooledObjectList.Add(buffer);
-            CountAll++;
+            _countAll++;
         }
     }
 }

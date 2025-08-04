@@ -4,9 +4,15 @@ using UnityEngine;
 
 public class BombSpawner : SpawnerBase<Bomb>
 {
+    [SerializeField] private SpawnerStatsView _spawnerStatsView;
+
+    private int _spawnCount = 0;
+
     public void Spawn(Vector3 position)
     {
         Bomb bomb = ObjectPool.Get();
+        _spawnCount++;
+        _spawnerStatsView.Render(_spawnCount, ObjectPool.CountAll, ObjectPool.CountActive);
         bomb.transform.position = position;
     }
 

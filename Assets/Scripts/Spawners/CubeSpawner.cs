@@ -9,6 +9,10 @@ public class CubeSpawner : SpawnerBase<Cube>
     [SerializeField] private float _spawnDelay = 0.2f;
 
     [SerializeField] private BombSpawner _bombSpawner;
+    [Space(10)]
+    [SerializeField] private SpawnerStatsView _spawnerStatsView;
+
+    private int _spawnCount = 0;
 
     private void Start()
     {
@@ -27,6 +31,8 @@ public class CubeSpawner : SpawnerBase<Cube>
             yield return spawnWait;
 
             Cube cube = ObjectPool.Get();
+            _spawnCount++;
+            _spawnerStatsView.Render(_spawnCount, ObjectPool.CountAll, ObjectPool.CountActive);
 
             Vector3 platformPosition = platform.transform.position;
             float halfSizeX = platform.Size.x / 2;
