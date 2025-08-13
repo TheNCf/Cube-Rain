@@ -36,9 +36,9 @@ public abstract class SpawnerBase<T> : MonoBehaviour where T : UnityEngine.Objec
 
     protected abstract T Create();
 
-    protected abstract void OnGet(T cube);
+    protected abstract void OnGet(T obj);
 
-    protected abstract void OnRelease(T cube);
+    protected abstract void OnRelease(T obj);
 
-    protected abstract void OnClear(T cube);
+    protected abstract void OnClear(T obj);
 }
